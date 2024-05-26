@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// schema.prisma
+datasource db {
+  // MySQL 데이터베이스 엔진을 사용합니다.
+  provider = "mysql"
+  // 데이터베이스 연결 정보를 .env 파일의 DATABASE_URL 로부터 읽어옵니다.
+  url      = env("DATABASE_URL")
+}
+
+// schema.prisma 첫줄 설명 @id의 @ : 프라이머리키를 나타내는 기본키, 
+// @default(autoincrement()) 아무런 데이터가 없을 때 autoincrement()쓸 것
+// 왼쪽의 productId는 js사용하는 키 값, 오른쪽의 @map("productId")는 실제 db에 생성(정의)될 컬럼명
+enum Role {
+  APPLICANT
+  RECRUITER
+}
+// model user {
+//   id Int @id @default(autoincrement()) @map("id")
+//   email String @unique @map("email")
+//   password String @map("password")
+//   name String @map("name")
+//   role String @default("APPLICANT") @map("role")
+//   createdAt DateTime @default(now()) @map("createdAt")
+//   updatedAt DateTime @updatedAt @map("updatedAt")
+//   @@map("user")
+// }
+
+// //id title introduce rusume_id status createdAt upatedAt
+// model resume {
+// id Int @id 
+// title String @map("title")
+// introduce String @db.Text @map("introduce")
+// resumeId String @map("resumeId")
+// status String @map("status")
+// createdAt DateTime @default(now()) @map("createdAt")
+// updatedAt DateTime @updatedAt @map("updatedAt")
+
+// @@map("resume")
+// }
+
+//---
+
+
+model User {
+  id Int @id @default(autoincrement()) @map("id")
+  email String @unique @map("email")
+  password String @map("password")
+  name String @map("name")
+  role Role @default(APPLICANT) @map("role")
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+
+  Resume Resume?
+  @@map("user")
+}
+
+//id title introduce rusume_id status createdAt upatedAt
+model Resume {
+Id Int @id @unique @map("user")
+title String @map("title")
+introduce String @db.Text @map("introduce")
+resumeId String @map("resumeId")
+status String @map("status")
+createdAt DateTime @default(now()) @map("createdAt")
+updatedAt DateTime @updatedAt @map("updatedAt")
+
+// User 테이블과 관계 설정 1-13 14분
+user User @relation(fields: [Id], references: [id], onDelete:Cascade)
+
+@@map("resume")
+}
