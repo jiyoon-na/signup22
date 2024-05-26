@@ -1,6 +1,7 @@
 import express from 'express';
-import { prisma } from '../utils/prisma.util.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { prisma } from '../utils/prisma.util.js';
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ router.post('/sign_up', async (req, res, next) => {
   const { email, password, password_confirm, name } = req.body;
   // 2. **유효성 검증 및 에러 처리**
   //     - **회원 정보 중 하나라도 빠진 경우** - “OOO을 입력해 주세요.”
-  if (!email || !password || password_confirm || !name) {
+  if (!email || !password || !password_confirm || !name) {
     return res.status(400).json({
       message: '회원정보를 모두 입력해주세요',
     });
@@ -45,11 +46,12 @@ router.post('/sign_up', async (req, res, next) => {
     });
   }
 
+  const hashedPassword = await bcrypt.hash(password,10);
   //user테이블에 이메일, 패스워드를 이용해 사용자 생성 ; 필요한 구문인지 확인
   const user = await prisma.users.create({
     data: {
       email,
-      password,
+      password: hashedPassword,
     },
   });
 
@@ -80,31 +82,49 @@ router.post('/sign_up', async (req, res, next) => {
   });
 });
 
-//get patch del
-router.post('/sign_up', async (req, res, next) => {
+//로그인 api
+router.post('/sign_in', async (req, res, next) => {
+    //이메일, 패스워드 전달받기
   const { email, password } = req.body;
-
-  if (!email || !password) {
+//이메일 형식 맞는지 확인, 사용자가 있는지 확인, 비밀번호 일치하는지 확인
+    const user = await prisma.user.findFirst({where: {email}});
+    const regex = /[a-zA-Z\d._+-]+@[a-zA-Z\d-]+\.[a-zA-Z\d.]+/;
+    if (!regex.test(email)) {
+      return res.status(400).json({
+        message: '이메일 형식이 올바르지 않습니다.',
+      });
+    }
+  if (!user) {
     return res.status(400).json({
-      message: '이메일과 비밀번호를 모두 입력해주세요',
+      message: '인증정보가 유효하지 않습니다',
     });
   }
-  const regex = /[a-zA-Z\d._+-]+@[a-zA-Z\d-]+\.[a-zA-Z\d.]+/;
-  if (!regex.test(email)) {
+  //bycrypt 이용해 비밀번호가 일치하는지 확인 
+  if(!await bcrypt.compare(password, user.password)){
     return res.status(400).json({
-      message: '이메일 형식이 올바르지 않습니다.',
+        message: '인증정보가 유효하지 않습니다',
     });
   }
+  //로그인성공 jwt 토큰발급
+  const token = jwt.sign(
+    {
+        user_id: user.user_id,
+    },
+  )
+  res.cookie('authorization', `Bearer ${token}`);
+    return res.status(200).json({
+        message: '로그인 성공했습니다'
+    });
   //이메일로 조회되지 않거나 비밀번호가 일치하지 않는 경우
-  const is_exist_user = await prisma.users.findFirst({
-    where: { email },
-    where: { password },
-  });
-  if (!email || !password) {
-    return res.status(400).json({
-      message: '인증정보가 유효하지 않습니다.',
-    });
-  }
+//   const is_exist_user = await prisma.users.findFirst({
+//     where: { email },
+//     where: { password },
+//   });
+//   if (!email || !password) {
+//     return res.status(400).json({
+//       message: '인증정보가 유효하지 않습니다.',
+//     });
+//   }
   //비즈니스 로직처리 : 엑세스토큰 ; 사용자 아이디 포함, 유효기간 12시간생성
 });
 

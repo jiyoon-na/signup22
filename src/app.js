@@ -2,7 +2,7 @@
 
 import express from 'express';
 import 'dotenv/config';
-// import cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import UsersRouter from './routers/users.router.js';
 
 // import { errorHandler } from './middlewares/error-handler.middleware.js';
@@ -15,7 +15,7 @@ app.get('/', (req, res, next) => {
 });
 
 app.use(express.json());
-// app.use(cookieParser());
+app.use(cookieParser());
 app.use('/api', [UsersRouter]);
 // app.use(errorHandler);
 
