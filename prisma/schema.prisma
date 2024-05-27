@@ -19,36 +19,11 @@ datasource db {
 // schema.prisma 첫줄 설명 @id의 @ : 프라이머리키를 나타내는 기본키, 
 // @default(autoincrement()) 아무런 데이터가 없을 때 autoincrement()쓸 것
 // 왼쪽의 productId는 js사용하는 키 값, 오른쪽의 @map("productId")는 실제 db에 생성(정의)될 컬럼명
+// 타입지정해줌
 enum Role {
   APPLICANT
   RECRUITER
 }
-// model user {
-//   id Int @id @default(autoincrement()) @map("id")
-//   email String @unique @map("email")
-//   password String @map("password")
-//   name String @map("name")
-//   role String @default("APPLICANT") @map("role")
-//   createdAt DateTime @default(now()) @map("createdAt")
-//   updatedAt DateTime @updatedAt @map("updatedAt")
-//   @@map("user")
-// }
-
-// //id title introduce rusume_id status createdAt upatedAt
-// model resume {
-// id Int @id 
-// title String @map("title")
-// introduce String @db.Text @map("introduce")
-// resumeId String @map("resumeId")
-// status String @map("status")
-// createdAt DateTime @default(now()) @map("createdAt")
-// updatedAt DateTime @updatedAt @map("updatedAt")
-
-// @@map("resume")
-// }
-
-//---
-
 
 model User {
   id Int @id @default(autoincrement()) @map("id")
@@ -62,6 +37,21 @@ model User {
   Resume Resume?
   @@map("user")
 }
+
+// model user_info {
+
+// }
+  // const user_info = await prisma.user_infos.create({
+  //   data: {
+  //     user_id: user.user_id,
+  //     email: email,
+  //     name: name,
+  //     role: 'APPLICANT',
+  //     // createdAt,
+  //     // updatedAt,
+  //   },
+  // });
+
 
 //id title introduce rusume_id status createdAt upatedAt
 model Resume {
