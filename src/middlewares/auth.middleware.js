@@ -1,23 +1,29 @@
 //로그인에 발급되는 토큰
 import jwt from 'jsonwebtoken';
-import prisma, { Prisma } from '../utils/prisma.util.js';
+import { prisma } from '../utils/prisma.util.js';
 
 export default async function (req, res, next) {
   try {
     //클라이언트로 부터 쿠키 전달받기
-    const { authorization } = req.cookies;
-    //쿠키가 bearer토큰 형식인지 확인
+    const { authorization } = req.headers['authorization'];
+    if (!authorization) throw new Error('토큰이 존재하지 않습니다.');
+
+    // req.cookies;
+    // bearer토큰 형식인지 확인
     const [tokenType, token] = authorization.split(' ');
     if (tokenType !== 'Bearer') throw new Error('토큰타입이 일치하지 않습니다');
 
-    const decodedToken = jwt.verify(token, 'customized_secret_key');
+    const decodedToken = jwt.verify(
+      token,
+      'process.env.ACCESS_TOKEN_SECRET_KEY',
+    );
     const user_id = decodedToken.user_id;
     //jwt의 user_id 이용해서 사용자 조회
     const user = await prisma.user.findFirst({
       where: { user_id: +user_id },
     });
     if (!user) {
-      res.clearCookie('authorization');
+      res.clearCookie('accessToken');
       throw new Error('토큰 사용자가 존재하지 않습니다.');
     }
     //req.user에 조회된 사용자 정보를 할당
@@ -25,7 +31,7 @@ export default async function (req, res, next) {
     //다음 미들웨어 실행
     next();
   } catch (error) {
-    res.clearCookie('authorization'); // 특정쿠키 삭제
+    res.clearCookie('accessToken'); // 특정쿠키 삭제
 
     switch (error.name) {
       case 'TokenExpriedError': //토큰 만료되었을 때 발생하는 에러
