@@ -2,6 +2,7 @@ import express, { json } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/prisma.util.js';
+import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -97,16 +98,35 @@ router.post('/sign_in', async (req, res, next) => {
     });
   }
   //로그인성공 jwt 토큰발급
-  const token = jwt.sign(
+  const accessToken = jwt.sign(
     {
       user_id: user.user_id,
     },
-    'customized_secret_key', //비밀키 나중에 dotenv에 넣을 것
+    process.env.ACCESS_TOKEN_SECRET_KEY,
+    { expiresIn: '12h' },
+    // 'customized_secret_key', //비밀키 나중에 dotenv에 넣을 것
   );
-  res.cookie('authorization', `Bearer ${token}`);
   return res.status(200).json({
     message: '로그인 성공했습니다',
+    data: {
+      accessToken,
+    },
   });
+
+  // const data = await response.json();
+  //   console.log(data);
+  //   //
+  //   // res.cookie('authorization', `Bearer ${token}`);
+  //   res.cookie('accessToken', accessToken);
+  //   // res.cookie('refreshToken', refreshToken);
+  //   // return res.status(200).json({
+  //   //   data,
+  //   //   message: '로그인 성공했습니다',
+  //   // });
+  //   return res
+  //     .status(200)
+  //     .json({ message: 'Token이 정상적으로 발급되었습니다.' });
+
   //이메일로 조회되지 않거나 비밀번호가 일치하지 않는 경우
   //   const is_exist_user = await prisma.users.findFirst({
   //     where: { email },
