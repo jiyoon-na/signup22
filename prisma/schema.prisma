@@ -52,14 +52,21 @@ model User {
   //   },
   // });
 
-
+enum status {
+APPLY
+DROP
+PASS
+INTERVIEW1
+INTERVIEW2
+FINAL_PASS
+}
 //id title introduce rusume_id status createdAt upatedAt
 model Resume {
 Id Int @id @unique @map("user")
 title String @map("title")
 introduce String @db.Text @map("introduce")
 resumeId String @map("resumeId")
-status String @map("status")
+status status @default(APPLY) @map("status")
 createdAt DateTime @default(now()) @map("createdAt")
 updatedAt DateTime @updatedAt @map("updatedAt")
 

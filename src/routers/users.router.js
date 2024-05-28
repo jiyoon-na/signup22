@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/prisma.util.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
+import errorHandler from '../middlewares/error-handler.middleware.js';
 
 const router = express.Router();
 
@@ -54,6 +55,7 @@ router.post('/sign_up', async (req, res, next) => {
       name,
       email,
       password: hashedPassword,
+      //없애기
     },
   });
   console.log(user);
@@ -85,6 +87,7 @@ router.post('/sign_in', async (req, res, next) => {
   //   });
   // }
   const user = await prisma.user.findFirst({ where: { email } });
+  console.log(user);
   if (!user) {
     return res.status(400).json({
       message: '사용자없음',
@@ -100,7 +103,7 @@ router.post('/sign_in', async (req, res, next) => {
   //로그인성공 jwt 토큰발급
   const accessToken = jwt.sign(
     {
-      user_id: user.user_id,
+      user_id: user.id,
     },
     process.env.ACCESS_TOKEN_SECRET_KEY,
     { expiresIn: '12h' },
@@ -112,35 +115,57 @@ router.post('/sign_in', async (req, res, next) => {
       accessToken,
     },
   });
-
-  // const data = await response.json();
-  //   console.log(data);
-  //   //
-  //   // res.cookie('authorization', `Bearer ${token}`);
-  //   res.cookie('accessToken', accessToken);
-  //   // res.cookie('refreshToken', refreshToken);
-  //   // return res.status(200).json({
-  //   //   data,
-  //   //   message: '로그인 성공했습니다',
-  //   // });
-  //   return res
-  //     .status(200)
-  //     .json({ message: 'Token이 정상적으로 발급되었습니다.' });
-
-  //이메일로 조회되지 않거나 비밀번호가 일치하지 않는 경우
-  //   const is_exist_user = await prisma.users.findFirst({
-  //     where: { email },
-  //     where: { password },
-  //   });
-  //   if (!email || !password) {
-  //     return res.status(400).json({
-  //       message: '인증정보가 유효하지 않습니다.',
-  //     });
-  //   }
-  //비즈니스 로직처리 : 엑세스토큰 ; 사용자 아이디 포함, 유효기간 12시간생성
 });
 
-//사용자 조회 api
-router.get('/users', async (req, res, next) => {});
+//사용자 인증; 미들웨어를 통해 들어간 토큰을 여기서 인증하나?
+// router.get('/auth', authMiddleware, async (req, res, next) => {
+//   const authToken = await req.headers.authorization;
+//   if (authToken) {
+//     return res.status(200).json({ user: req.user });
+//   }
+
+// const is_exist_user = await prisma.user.findFirst({
+//   where: { email },
+// });
+// if (is_exist_user) {
+//   return res.status(400).json({
+//     message: '이미 가입된 사용자 입니다.',
+//   });
+
+// try {
+//   const authToken = req.headers.authorization;
+//   if (!authToken) {
+//     return res.status(400).json({
+//       message: '인증정보가 없습니다.',
+//     });
+//   }
+//   //jwt 표준인증형태
+//   const [tokenType, token] = authorization.split(' ');
+
+//   if (tokenType !== 'Bearer')
+//     throw new Error('토큰 타입이 일치하지 않습니다.');
+//   //access 유효기간
+
+//   //payload 담긴 사용자 아이디와 일치하지 않은 경우
+
+//   //일치해서 사용자id이용해 정보 조회
+
+//   //조회된 정보를 res에 담아 정보조회
+// } catch (error) {
+//   //그 밖에 검증 실패시..
+//   console.error(error);
+// }
+// });
+//사용자 조회 api : 뭘로 조회하나? authorization 가능한가
+router.get('/users/me', authMiddleware, async (req, res, next) => {
+  //auth미들웨어에서 할당된 사용자정보 => 로그인한 아이디의 정보가 들어있음
+  const user = req.user;
+  const { password, ...userWithoutPassword } = user;
+  return res.status(200).json({
+    data: {
+      user: userWithoutPassword,
+    },
+  });
+});
 
 export default router;
