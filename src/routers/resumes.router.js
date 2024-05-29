@@ -43,7 +43,7 @@ router.post('/resumes', authMiddleware, async (req, res, next) => {
   //반환 이력서 id, 작성자 id, 제목, 자기소개, 지원상태, 생성일시, 수정일시
 });
 
-router.get('/resumes', authMiddleware, async (req, res, next) => {
+router.get('/resumes/me', authMiddleware, async (req, res, next) => {
   //이력서 목록조회
   //사용자 정보=인증을 통해 전달받음
   //query parameter로 정렬조건 받음, 과거순, 최신순으로 정렬받는데 값이 없는 경우 최신순으로 정렬
