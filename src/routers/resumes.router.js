@@ -28,17 +28,14 @@ router.post('/resumes', authMiddleware, async (req, res, next) => {
   //작성자 id는 인증 미들웨어 에서 전달받은 정보 활용
   const data = await prisma.resume.create({
     data: {
-      id,
+      authorId: id,
       title,
       introduce,
     },
   });
   return res.status(201).json({
     message: '이력서를 생성하였습니다.',
-    data: {
-      id: data.Id,
-      resumeId: data.resumeId,
-    },
+    data,
   });
   //이력서 id, 지원상태, 생성일시, 수정일시는 자동생성
   //지원상태의 종류(기본값 APPLY)
