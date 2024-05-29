@@ -55,13 +55,21 @@ router.post('/sign_up', async (req, res, next) => {
       name,
       email,
       password: hashedPassword,
-      //없애기
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
     },
   });
   console.log(user);
 
   // 4. **반환 정보**
   //     - **사용자 ID, 이메일, 이름, 역할, 생성일시, 수정일시**를 반환합니다.
+
   return res.status(201).json({
     message: '회원가입에 성공했습니다',
     data: user,

@@ -65,7 +65,7 @@ model Resume {
 Id Int @id @unique @map("user")
 title String @map("title")
 introduce String @db.Text @map("introduce")
-resumeId String @map("resumeId")
+resumeId String @default(cuid()) @map("resumeId")
 status status @default(APPLY) @map("status")
 createdAt DateTime @default(now()) @map("createdAt")
 updatedAt DateTime @updatedAt @map("updatedAt")
@@ -75,3 +75,7 @@ user User @relation(fields: [Id], references: [id], onDelete:Cascade)
 
 @@map("resume")
 }
+
+//prisma db push
+//안되면
+//prisma db push --accept-data-loss

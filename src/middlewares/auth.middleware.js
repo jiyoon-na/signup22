@@ -36,7 +36,7 @@ export default async function (req, res, next) {
         return res.status(401).json({ message: '토큰이 만료되었습니다' });
       //토큰검증이 실패했을 때 발생하는 에러
       case 'JsonWebTokenError':
-        return res.status(401).json({ message: '토큰 인증에1 실패하였습니다' });
+        return res.status(401).json({ message: '토큰 인증에 실패하였습니다' });
 
       default:
         return res
