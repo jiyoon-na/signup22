@@ -38,20 +38,6 @@ model User {
   @@map("user")
 }
 
-// model user_info {
-
-// }
-  // const user_info = await prisma.user_infos.create({
-  //   data: {
-  //     user_id: user.user_id,
-  //     email: email,
-  //     name: name,
-  //     role: 'APPLICANT',
-  //     // createdAt,
-  //     // updatedAt,
-  //   },
-  // });
-
 enum status {
 APPLY
 DROP
@@ -62,7 +48,7 @@ FINAL_PASS
 }
 //id title introduce rusume_id status createdAt upatedAt
 model Resume {
-Id Int @id @unique @map("user")
+Id Int @id @unique @map("Id")
 title String @map("title")
 introduce String @db.Text @map("introduce")
 resumeId String @default(cuid()) @map("resumeId")
